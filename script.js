@@ -57,7 +57,12 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     if (!taskItem) return;
     taskItem.classList.toggle('task__done');
     taskItemInput = taskItem.getElementsByTagName('input');
-    taskItemInput[0].checked = !taskItemInput[0].checked;
+    if (taskItemInput[0].checked) {
+        taskItemInput[0].removeAttribute("checked");
+    } else {
+        taskItemInput[0].setAttribute("checked", "checked");
+    }
+    // taskItemInput[0].checked = !taskItemInput[0].checked;
 });
 
 // On load
@@ -66,12 +71,12 @@ window.onload = function() {
 };
 
 // Adding to localStorage
-// window.addEventListener('beforeunload', e => {
-//     // Cancel the event
-//     // e.preventDefault();
-//     // Chrome requires returnValue to be set
-//     e.returnValue = 'returnValue';
-//     localStorage.setItem('tasks', toDoListTasks.innerHTML);
+window.addEventListener('beforeunload', e => {
+    // Cancel the event
+    // e.preventDefault();
+    // Chrome requires returnValue to be set
+    e.returnValue = 'returnValue';
+    localStorage.setItem('tasks', toDoListTasks.innerHTML);
 
-//     // console.log('test 2');
-//   });
+    // console.log('test 2');
+  });
