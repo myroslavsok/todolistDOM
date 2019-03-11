@@ -56,13 +56,24 @@ toDoListTasks.addEventListener('mousedown', (event) => {
             }
         });
         return;
-    } 
+    }
     // Editing name
     if (target.closest('button.edit_task__item')) {
         let taskItemContainer = target.closest('button.edit_task__item').parentNode.parentNode;
         let taskItemName = taskItemContainer.getElementsByTagName('p');
-        return taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
-        //ESC
+        let defaultText = taskItemName[0].textContent;
+        taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
+        console.log(taskItemName[0].textContent == true);
+        console.log('defaultText', defaultText);
+        if (!taskItemName[0].textContent)
+            taskItemName[0].textContent = defaultText;
+        tasksList.querySelectorAll('input').forEach(item => {
+            if (item.checked) {
+                let listName = item.parentNode.querySelector('p').textContent;
+                localStorage.setItem(listName, toDoListTasks.innerHTML);
+            }
+        });
+        return;
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -77,7 +88,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 });
 
 // On load
-window.onload = function() {
+window.onload = function () {
     tasksList.innerHTML = localStorage.getItem('lists');
 };
 
@@ -94,7 +105,7 @@ window.addEventListener('beforeunload', e => {
             console.log(item.parentNode.lastChild.textContent);
         }
     })
-  });
+});
 
 // Add new list
 let addListBtn = document.getElementById('addListBtn');
@@ -125,11 +136,12 @@ tasksList.addEventListener('mousedown', e => {
     let target = e.target;
     // Select
     toDoListTasks.innerHTML = '';
+    addTaskField.removeAttribute('disabled');
     if (!target.closest('label')) return;
     let listName = target.closest('label').querySelector('p').textContent;
-    for (let key in localStorage) 
-    if (key === listName) 
-    toDoListTasks.innerHTML = localStorage.getItem(listName);
+    for (let key in localStorage)
+        if (key === listName)
+            toDoListTasks.innerHTML = localStorage.getItem(listName);
     console.log('listName', listName);
     // Delete
     if (!target.closest('.list_delete__btn')) return;
