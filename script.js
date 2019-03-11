@@ -1,5 +1,14 @@
 let toDoListTasks = document.getElementById('toDoListTasks');
 
+function saveToLocalStorage() {
+    tasksList.querySelectorAll('input').forEach(item => {
+        if (item.checked) {
+            let listName = item.parentNode.querySelector('p').textContent;
+            localStorage.setItem(listName, toDoListTasks.innerHTML);
+        }
+    });
+} 
+
 // Adding task
 let addTaskBtn = document.getElementById('addTaskBtn');
 let addTaskField = document.getElementById('addTaskField');
@@ -35,12 +44,7 @@ addTaskBtn.addEventListener('click', () => {
 
     addTaskField.value = '';
 
-    tasksList.querySelectorAll('input').forEach(item => {
-        if (item.checked) {
-            let listName = item.parentNode.querySelector('p').textContent;
-            localStorage.setItem(listName, toDoListTasks.innerHTML);
-        }
-    });
+    saveToLocalStorage();
 });
 
 // Checking-unchecking, deleting, edit task (useing delegation)
@@ -49,13 +53,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     // Deleting
     if (target.closest('button.remove_task__item')) {
         target.closest('button.remove_task__item').parentNode.parentNode.remove();
-        tasksList.querySelectorAll('input').forEach(item => {
-            if (item.checked) {
-                let listName = item.parentNode.querySelector('p').textContent;
-                localStorage.setItem(listName, toDoListTasks.innerHTML);
-            }
-        });
-        return;
+        return saveToLocalStorage();
     }
     // Editing name
     if (target.closest('button.edit_task__item')) {
@@ -63,17 +61,9 @@ toDoListTasks.addEventListener('mousedown', (event) => {
         let taskItemName = taskItemContainer.getElementsByTagName('p');
         let defaultText = taskItemName[0].textContent;
         taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
-        console.log(taskItemName[0].textContent == true);
-        console.log('defaultText', defaultText);
         if (!taskItemName[0].textContent)
             taskItemName[0].textContent = defaultText;
-        tasksList.querySelectorAll('input').forEach(item => {
-            if (item.checked) {
-                let listName = item.parentNode.querySelector('p').textContent;
-                localStorage.setItem(listName, toDoListTasks.innerHTML);
-            }
-        });
-        return;
+        return saveToLocalStorage();
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -85,6 +75,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     } else {
         taskItemInput[0].setAttribute("checked", "checked");
     }
+    saveToLocalStorage();
 });
 
 // On load
@@ -98,13 +89,7 @@ window.addEventListener('beforeunload', e => {
     e.returnValue = 'returnValue';
     localStorage.setItem('lists', tasksList.innerHTML);
 
-    tasksList.querySelectorAll('input').forEach(item => {
-        if (item.checked) {
-            let listName = item.parentNode.lastChild.textContent;
-            toDoListTasks.innerHTML = localStorage.getItem(listName);
-            console.log(item.parentNode.lastChild.textContent);
-        }
-    })
+    saveToLocalStorage();
 });
 
 // Add new list
@@ -135,14 +120,13 @@ addListBtn.addEventListener('click', () => {
 tasksList.addEventListener('mousedown', e => {
     let target = e.target;
     // Select
-    toDoListTasks.innerHTML = '';
-    addTaskField.removeAttribute('disabled');
     if (!target.closest('label')) return;
+    addTaskField.removeAttribute('disabled');
+    toDoListTasks.innerHTML = '';
     let listName = target.closest('label').querySelector('p').textContent;
     for (let key in localStorage)
         if (key === listName)
             toDoListTasks.innerHTML = localStorage.getItem(listName);
-    console.log('listName', listName);
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     target.closest('.list_delete__btn').parentNode.remove();
