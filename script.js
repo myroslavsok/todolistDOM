@@ -133,5 +133,5 @@ tasksList.addEventListener('mousedown', e => {
     localStorage.removeItem(listName);
     toDoListTasks.innerHTML = '';
     addTaskField.setAttribute('disabled', 'disabled');
-    // alert('1');
+
 });
