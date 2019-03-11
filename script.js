@@ -132,4 +132,6 @@ tasksList.addEventListener('mousedown', e => {
     target.closest('.list_delete__btn').parentNode.remove();
     localStorage.removeItem(listName);
     toDoListTasks.innerHTML = '';
+    addTaskField.setAttribute('disabled', 'disabled');
+    // alert('1');
 });
