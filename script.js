@@ -9,6 +9,11 @@ function saveToLocalStorage() {
     });
 } 
 
+let formAddItem = document.getElementById('formAddListItem');
+formAddItem.addEventListener('submit', e => {
+    e.preventDefault();
+})
+
 // Adding task
 let addTaskBtn = document.getElementById('addTaskBtn');
 let addTaskField = document.getElementById('addTaskField');
@@ -133,5 +138,4 @@ tasksList.addEventListener('mousedown', e => {
     localStorage.removeItem(listName);
     toDoListTasks.innerHTML = '';
     addTaskField.setAttribute('disabled', 'disabled');
-
 });
