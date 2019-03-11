@@ -13,14 +13,24 @@ addTaskBtn.addEventListener('click', () => {
     let itemTaskLabel = document.createElement('label');
     let itemTaskInput = document.createElement('input');
     itemTaskInput.setAttribute('type', 'checkbox');
-
     let itemTaskText = document.createElement('p');
     itemTaskText.textContent = addTaskField.value;
-
     itemTaskLabel.append(itemTaskInput);
     itemTaskLabel.append(itemTaskText);
-    
     itemTaskDiv.append(itemTaskLabel);
+
+    let itemControlPanel = document.createElement('div');
+    itemControlPanel.classList.add('item__control__panel');
+    let itemEditBtn = document.createElement('button');
+    itemEditBtn.classList.add('edit_task__item');
+    itemEditBtn.textContent = 'Edit';
+    let itemRemoveBtn = document.createElement('button');
+    itemRemoveBtn.classList.add('remove_task__item');
+    itemRemoveBtn.textContent = 'Remove';
+    itemControlPanel.append(itemEditBtn);
+    itemControlPanel.append(itemRemoveBtn);
+    itemTaskDiv.append(itemControlPanel);
+
     toDoListTasks.append(itemTaskDiv);
 
     addTaskField.value = '';
@@ -30,12 +40,18 @@ addTaskBtn.addEventListener('click', () => {
     localStorage.setItem('tasks', toDoListTasks.innerHTML);
 });
 
-// Checking-unchecking, deleting, edit task
+// Checking-unchecking, deleting, edit task (useing delegation)
 toDoListTasks.addEventListener('mousedown', (event) => {
     let target = event.target;
     // Deleting
     if (target.closest('button.remove_task__item')) 
         return target.closest('button.remove_task__item').parentNode.parentNode.remove();
+    // Editing name
+    if (target.closest('button.edit_task__item')) {
+        let taskItemContainer = target.closest('button.edit_task__item').parentNode.parentNode;
+        let taskItemName = taskItemContainer.getElementsByTagName('p');
+        return taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
+    }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
     if (!taskItem) return;
@@ -45,9 +61,9 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 });
 
 // On load
-// window.onload = function() {
-//     toDoListTasks.innerHTML = localStorage.getItem('tasks');
-// };
+window.onload = function() {
+    toDoListTasks.innerHTML = localStorage.getItem('tasks');
+};
 
 // Adding to localStorage
 // window.addEventListener('beforeunload', e => {
@@ -55,6 +71,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 //     // e.preventDefault();
 //     // Chrome requires returnValue to be set
 //     e.returnValue = 'returnValue';
+//     localStorage.setItem('tasks', toDoListTasks.innerHTML);
+
 //     // console.log('test 2');
-//     localStorage.setItem('test', toDoListTasks.innerHTML);
 //   });
