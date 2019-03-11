@@ -66,20 +66,35 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 });
 
 // On load
-// window.onload = function() {
-//     toDoListTasks.innerHTML = localStorage.getItem('tasks');
-// };
+let saves = [];
+window.onload = function() {
+    // toDoListTasks.innerHTML = localStorage.getItem('tasks');
+    // saves = JSON.parse(localStorage.getItem('tasksLists'));
+    // tasksList.innerHTML = localStorage.get('tasksList');
+    // console.log(localStorage.getItem('tasksList'));
+
+    // tasksList.innerHTML = localStorage.getItem('lists');
+    console.log(localStorage.getItem('lists'));
+};
 
 // Adding to localStorage
-// window.addEventListener('beforeunload', e => {
-//     // Cancel the event
-//     // e.preventDefault();
-//     // Chrome requires returnValue to be set
-//     e.returnValue = 'returnValue';
-//     localStorage.setItem('tasks', toDoListTasks.innerHTML);
+window.addEventListener('beforeunload', e => {
+    // Cancel the event
+    // e.preventDefault();
+    // Chrome requires returnValue to be set
+    e.returnValue = 'returnValue';
+    localStorage.setItem('lists', tasksList.innerHTML);
 
-//     // console.log('test 2');
-//   });
+    tasksList.querySelectorAll('input').forEach(item => {
+        if (item.checked) {
+            let listName = item.parentNode.lastChild.textContent;
+            toDoListTasks.innerHTML = localStorage.getItem(listName);
+            console.log(item.parentNode.lastChild.textContent);
+        }
+    })
+    // console.log(tasksList.querySelectorAll('input'));
+
+  });
 
 // Add new list
 let addListBtn = document.getElementById('addListBtn');
@@ -93,9 +108,41 @@ addListBtn.addEventListener('click', () => {
     listItemInput.name = 'todolist';
     let listItemText = document.createElement('p');
     listItemText.textContent = addListField.value;
+    let btnDelete = document.createElement('button');
+    btnDelete.textContent = 'Delete';
+    btnDelete.classList.add('list_delete__btn');
     listItem.append(listItemInput);
     listItem.append(listItemText);
-    
+    listItem.append(btnDelete);
+
     tasksList.append(listItem);
     addListField.value = '';
-})
+});
+
+
+// Selected and Delete list
+tasksList.addEventListener('mousedown', e => {
+    let target = e.target;
+    // Select
+    if (!target.closest('label')) return;
+    // localStorage.setItem()
+    let listName = target.closest('label').querySelector('p').textContent;
+    let listItems = toDoListTasks.innerHTML;
+    localStorage.setItem(listName, listItems);
+    
+    localStorage.setItem('lists', tasksList.innerHTML);
+
+    // toDoListTasks.innerHTML = localStorage.getItem(listName);
+    console.log(listName);
+
+    // Delete
+    if (!target.closest('.list_delete__btn')) return;
+    target.closest('.list_delete__btn').parentNode.remove();
+});
+
+// Delete list
+tasksList.addEventListener('mousedown', e => {
+    let target = e.target;
+    if (!target.closest('.list_delete__btn')) return;
+});
+
