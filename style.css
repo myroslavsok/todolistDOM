@@ -12,7 +12,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid red;
+    border: 1px solid lightgray;
 }
 
 .todolist__container {
@@ -24,10 +24,14 @@ main {
 /* TASK LIST */
 .task__list__container {
     width: 20%;
+    border: 1px solid lightgray;
 }
 .task__lists {
     height: 91%;
     overflow-y: auto;
+}
+.task__lists label {
+    margin: 2px;
 }
 .task__list__container label {
     display: flex;
@@ -45,13 +49,12 @@ main {
 .task__container {
     width: 80%;
     overflow-y: auto;
-    border: 1px solid blue;
 }
-
 
 /* TASK ITEM */
 .task__item {
-    width: 100%;
+    width: 99%;
+    margin: 2px auto;
     min-height: 50px;
     display: flex;
     justify-content: space-between;
