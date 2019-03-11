@@ -40,7 +40,7 @@ addTaskBtn.addEventListener('click', () => {
     itemControlPanel.append(itemRemoveBtn);
     itemTaskDiv.append(itemControlPanel);
 
-    toDoListTasks.append(itemTaskDiv);
+    toDoListTasks.prepend(itemTaskDiv);
 
     addTaskField.value = '';
 
@@ -111,7 +111,7 @@ addListBtn.addEventListener('click', () => {
     listItem.append(listItemText);
     listItem.append(btnDelete);
 
-    tasksList.append(listItem);
+    tasksList.prepend(listItem);
     addListField.value = '';
 });
 
