@@ -21,9 +21,26 @@ main {
     align-items: stretch;
 }
 
+/* TASK LIST */
 .task__list__container {
     width: 20%;
 }
+.task__lists {
+    height: 91%;
+    overflow-y: auto;
+}
+.task__list__container label {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid black;
+}
+
+.lists__control__panel input {
+    width: 80%;
+}
+
+/*  */
 
 .task__container {
     width: 80%;

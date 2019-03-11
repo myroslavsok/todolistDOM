@@ -51,6 +51,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
         let taskItemContainer = target.closest('button.edit_task__item').parentNode.parentNode;
         let taskItemName = taskItemContainer.getElementsByTagName('p');
         return taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
+        //ESC
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -62,21 +63,39 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     } else {
         taskItemInput[0].setAttribute("checked", "checked");
     }
-    // taskItemInput[0].checked = !taskItemInput[0].checked;
 });
 
 // On load
-window.onload = function() {
-    toDoListTasks.innerHTML = localStorage.getItem('tasks');
-};
+// window.onload = function() {
+//     toDoListTasks.innerHTML = localStorage.getItem('tasks');
+// };
 
 // Adding to localStorage
-window.addEventListener('beforeunload', e => {
-    // Cancel the event
-    // e.preventDefault();
-    // Chrome requires returnValue to be set
-    e.returnValue = 'returnValue';
-    localStorage.setItem('tasks', toDoListTasks.innerHTML);
+// window.addEventListener('beforeunload', e => {
+//     // Cancel the event
+//     // e.preventDefault();
+//     // Chrome requires returnValue to be set
+//     e.returnValue = 'returnValue';
+//     localStorage.setItem('tasks', toDoListTasks.innerHTML);
 
-    // console.log('test 2');
-  });
+//     // console.log('test 2');
+//   });
+
+// Add new list
+let addListBtn = document.getElementById('addListBtn');
+let addListField = document.getElementById('addListField');
+let tasksList = document.getElementById('tasksList');
+
+addListBtn.addEventListener('click', () => {
+    let listItem = document.createElement('label');
+    let listItemInput = document.createElement('input');
+    listItemInput.type = 'radio';
+    listItemInput.name = 'todolist';
+    let listItemText = document.createElement('p');
+    listItemText.textContent = addListField.value;
+    listItem.append(listItemInput);
+    listItem.append(listItemText);
+    
+    tasksList.append(listItem);
+    addListField.value = '';
+})

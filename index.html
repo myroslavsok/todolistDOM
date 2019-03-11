@@ -18,10 +18,23 @@
         </div>
         <div class="todolist__container">
             <div class="task__list__container">
-                
+                <div class="task__lists" id="tasksList">
+                    <label>
+                        <input type="radio" name="todolist" value="email">
+                        <p>todolist 1</p>
+                    </label>
+                    <label>
+                        <input type="radio" name="todolist" value="email">
+                        <p>todolist 2</p>
+                    </label>
+                </div>
+                <div class="lists__control__panel">
+                    <input id="addListField" type="text">
+                    <button id="addListBtn">Add new list</button>
+                </div>
             </div>
             <div class="task__container" id="toDoListTasks">
-                <!-- <div class="task__item">
+                <div class="task__item">
                     <label>
                         <input type="checkbox">
                         <p>some text</p>
@@ -40,7 +53,7 @@
                         <button class="edit_task__item">Edit</button>
                         <button class="remove_task__item">Remove</button>
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
     </main>
