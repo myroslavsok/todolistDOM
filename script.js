@@ -35,17 +35,28 @@ addTaskBtn.addEventListener('click', () => {
 
     addTaskField.value = '';
 
-    //test
-    console.log(toDoListTasks.innerHTML);
-    localStorage.setItem('tasks', toDoListTasks.innerHTML);
+    tasksList.querySelectorAll('input').forEach(item => {
+        if (item.checked) {
+            let listName = item.parentNode.querySelector('p').textContent;
+            localStorage.setItem(listName, toDoListTasks.innerHTML);
+        }
+    });
 });
 
 // Checking-unchecking, deleting, edit task (useing delegation)
 toDoListTasks.addEventListener('mousedown', (event) => {
     let target = event.target;
     // Deleting
-    if (target.closest('button.remove_task__item')) 
-        return target.closest('button.remove_task__item').parentNode.parentNode.remove();
+    if (target.closest('button.remove_task__item')) {
+        target.closest('button.remove_task__item').parentNode.parentNode.remove();
+        tasksList.querySelectorAll('input').forEach(item => {
+            if (item.checked) {
+                let listName = item.parentNode.querySelector('p').textContent;
+                localStorage.setItem(listName, toDoListTasks.innerHTML);
+            }
+        });
+        return;
+    } 
     // Editing name
     if (target.closest('button.edit_task__item')) {
         let taskItemContainer = target.closest('button.edit_task__item').parentNode.parentNode;
@@ -66,22 +77,13 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 });
 
 // On load
-let saves = [];
 window.onload = function() {
-    // toDoListTasks.innerHTML = localStorage.getItem('tasks');
-    // saves = JSON.parse(localStorage.getItem('tasksLists'));
-    // tasksList.innerHTML = localStorage.get('tasksList');
-    // console.log(localStorage.getItem('tasksList'));
-
-    // tasksList.innerHTML = localStorage.getItem('lists');
-    console.log(localStorage.getItem('lists'));
+    tasksList.innerHTML = localStorage.getItem('lists');
 };
 
 // Adding to localStorage
 window.addEventListener('beforeunload', e => {
-    // Cancel the event
-    // e.preventDefault();
-    // Chrome requires returnValue to be set
+    e.preventDefault();
     e.returnValue = 'returnValue';
     localStorage.setItem('lists', tasksList.innerHTML);
 
@@ -92,8 +94,6 @@ window.addEventListener('beforeunload', e => {
             console.log(item.parentNode.lastChild.textContent);
         }
     })
-    // console.log(tasksList.querySelectorAll('input'));
-
   });
 
 // Add new list
@@ -124,25 +124,16 @@ addListBtn.addEventListener('click', () => {
 tasksList.addEventListener('mousedown', e => {
     let target = e.target;
     // Select
+    toDoListTasks.innerHTML = '';
     if (!target.closest('label')) return;
-    // localStorage.setItem()
     let listName = target.closest('label').querySelector('p').textContent;
-    let listItems = toDoListTasks.innerHTML;
-    localStorage.setItem(listName, listItems);
-    
-    localStorage.setItem('lists', tasksList.innerHTML);
-
-    // toDoListTasks.innerHTML = localStorage.getItem(listName);
-    console.log(listName);
-
+    for (let key in localStorage) 
+    if (key === listName) 
+    toDoListTasks.innerHTML = localStorage.getItem(listName);
+    console.log('listName', listName);
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     target.closest('.list_delete__btn').parentNode.remove();
+    localStorage.removeItem(listName);
+    toDoListTasks.innerHTML = '';
 });
-
-// Delete list
-tasksList.addEventListener('mousedown', e => {
-    let target = e.target;
-    if (!target.closest('.list_delete__btn')) return;
-});
-
