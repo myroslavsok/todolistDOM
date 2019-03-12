@@ -1,3 +1,23 @@
+toDoList = [
+    {
+        list_name: 'First list',
+        list_tasks: ['First 1', 'First 2', 'First 3']     
+    },
+    {
+        list_name: 'second list',
+        list_tasks: ['second 1', 'second 2', 'second 3']     
+    },
+    {
+        list_name: 'Third list',
+        list_tasks: ['Third 1', 'Third 2', 'Third 3']     
+    },
+    {
+        list_name: 'Fours list',
+        list_tasks: ['Fours 1', 'Fours 2', 'Fours 3']     
+    },
+]
+
+
 let toDoListTasks = document.getElementById('toDoListTasks');
 
 function saveToLocalStorage() {
@@ -9,8 +29,10 @@ function saveToLocalStorage() {
     });
 }
 
-function renderListItem() {
-    if (!addTaskField.value) return alert('Field is empty');
+function renderListItem(taskName) {
+    //check
+    if (!addTaskField.value && taskName == undefined) return alert('Field is empty');
+
 
     let itemTaskDiv = document.createElement('div');
     itemTaskDiv.classList.add('task__item');
@@ -19,7 +41,8 @@ function renderListItem() {
     let itemTaskInput = document.createElement('input');
     itemTaskInput.setAttribute('type', 'checkbox');
     let itemTaskText = document.createElement('p');
-    itemTaskText.textContent = addTaskField.value;
+    
+    itemTaskText.textContent = (taskName == undefined) ? addTaskField.value : taskName;
     itemTaskLabel.append(itemTaskInput);
     itemTaskLabel.append(itemTaskText);
     itemTaskDiv.append(itemTaskLabel);
@@ -49,14 +72,8 @@ formAddListItem.addEventListener('submit', e => {
 });
 
 // Adding task
-let addTaskBtn = document.getElementById('addTaskBtn');
+// let addTaskBtn = document.getElementById('addTaskBtn');
 let addTaskField = document.getElementById('addTaskField');
-
-// addTaskBtn.addEventListener('click', e => {
-//     e.preventDefault();
-//     renderListItem();
-//     saveToLocalStorage();
-// });
 
 // Checking-unchecking, deleting, edit task (useing delegation)
 toDoListTasks.addEventListener('mousedown', (event) => {
@@ -91,30 +108,32 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 
 // On load
 window.onload = function () {
-    tasksList.innerHTML = localStorage.getItem('lists');
+    toDoList.forEach(item => {
+        renderList(item.list_name);
+    });
+    // tasksList.innerHTML = localStorage.getItem('lists');
 };
 
 // Adding to localStorage
-window.addEventListener('beforeunload', e => {
-    e.preventDefault();
-    e.returnValue = 'returnValue';
-    localStorage.setItem('lists', tasksList.innerHTML);
-
-    saveToLocalStorage();
-});
+// window.addEventListener('beforeunload', e => {
+//     e.preventDefault();
+//     e.returnValue = 'returnValue';
+//     localStorage.setItem('lists', tasksList.innerHTML);
+//     saveToLocalStorage();
+// });
 
 // Add new list
-let addListBtn = document.getElementById('addListBtn');
+// let addListBtn = document.getElementById('addListBtn');
 let addListField = document.getElementById('addListField');
 let tasksList = document.getElementById('tasksList');
 
-function renderList() {
+function renderList(listName) {
     let listItem = document.createElement('label');
     let listItemInput = document.createElement('input');
     listItemInput.type = 'radio';
     listItemInput.name = 'todolist';
     let listItemText = document.createElement('p');
-    listItemText.textContent = addListField.value;
+    listItemText.textContent = (listName == undefined) ? addListField.value : listName;
     let btnDelete = document.createElement('button');
     btnDelete.textContent = 'Delete';
     btnDelete.classList.add('list_delete__btn');
@@ -132,24 +151,6 @@ formAddList.addEventListener('submit', e => {
     renderList();
 });
 
-// addListBtn.addEventListener('click', () => {
-//     let listItem = document.createElement('label');
-//     let listItemInput = document.createElement('input');
-//     listItemInput.type = 'radio';
-//     listItemInput.name = 'todolist';
-//     let listItemText = document.createElement('p');
-//     listItemText.textContent = addListField.value;
-//     let btnDelete = document.createElement('button');
-//     btnDelete.textContent = 'Delete';
-//     btnDelete.classList.add('list_delete__btn');
-//     listItem.append(listItemInput);
-//     listItem.append(listItemText);
-//     listItem.append(btnDelete);
-
-//     tasksList.prepend(listItem);
-//     addListField.value = '';
-// });
-
 
 // Selected and Delete list
 tasksList.addEventListener('mousedown', e => {
@@ -159,9 +160,16 @@ tasksList.addEventListener('mousedown', e => {
     addTaskField.removeAttribute('disabled');
     toDoListTasks.innerHTML = '';
     let listName = target.closest('label').querySelector('p').textContent;
-    for (let key in localStorage)
-        if (key === listName)
-            toDoListTasks.innerHTML = localStorage.getItem(listName);
+    // alert(listName);
+    toDoList.forEach(list => {
+        if (list.list_name === listName) 
+            list.list_tasks.forEach(task => {
+                renderListItem(task);
+            });
+    });
+    // for (let key in localStorage)
+    //     if (key === listName)
+    //         toDoListTasks.innerHTML = localStorage.getItem(listName);
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     target.closest('.list_delete__btn').parentNode.remove();
