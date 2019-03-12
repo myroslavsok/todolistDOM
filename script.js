@@ -7,18 +7,9 @@ function saveToLocalStorage() {
             localStorage.setItem(listName, toDoListTasks.innerHTML);
         }
     });
-} 
+}
 
-let formAddItem = document.getElementById('formAddListItem');
-formAddItem.addEventListener('submit', e => {
-    e.preventDefault();
-})
-
-// Adding task
-let addTaskBtn = document.getElementById('addTaskBtn');
-let addTaskField = document.getElementById('addTaskField');
-
-addTaskBtn.addEventListener('click', () => {
+function renderListItem() {
     if (!addTaskField.value) return alert('Field is empty');
 
     let itemTaskDiv = document.createElement('div');
@@ -48,9 +39,24 @@ addTaskBtn.addEventListener('click', () => {
     toDoListTasks.prepend(itemTaskDiv);
 
     addTaskField.value = '';
+}
 
+let formAddListItem = document.getElementById('formAddListItem');
+formAddListItem.addEventListener('submit', e => {
+    e.preventDefault();
+    renderListItem();
     saveToLocalStorage();
 });
+
+// Adding task
+let addTaskBtn = document.getElementById('addTaskBtn');
+let addTaskField = document.getElementById('addTaskField');
+
+// addTaskBtn.addEventListener('click', e => {
+//     e.preventDefault();
+//     renderListItem();
+//     saveToLocalStorage();
+// });
 
 // Checking-unchecking, deleting, edit task (useing delegation)
 toDoListTasks.addEventListener('mousedown', (event) => {
@@ -102,7 +108,7 @@ let addListBtn = document.getElementById('addListBtn');
 let addListField = document.getElementById('addListField');
 let tasksList = document.getElementById('tasksList');
 
-addListBtn.addEventListener('click', () => {
+function renderList() {
     let listItem = document.createElement('label');
     let listItemInput = document.createElement('input');
     listItemInput.type = 'radio';
@@ -118,7 +124,31 @@ addListBtn.addEventListener('click', () => {
 
     tasksList.prepend(listItem);
     addListField.value = '';
+}
+
+let formAddList = document.getElementById('formAddList');
+formAddList.addEventListener('submit', e => {
+    e.preventDefault();
+    renderList();
 });
+
+// addListBtn.addEventListener('click', () => {
+//     let listItem = document.createElement('label');
+//     let listItemInput = document.createElement('input');
+//     listItemInput.type = 'radio';
+//     listItemInput.name = 'todolist';
+//     let listItemText = document.createElement('p');
+//     listItemText.textContent = addListField.value;
+//     let btnDelete = document.createElement('button');
+//     btnDelete.textContent = 'Delete';
+//     btnDelete.classList.add('list_delete__btn');
+//     listItem.append(listItemInput);
+//     listItem.append(listItemText);
+//     listItem.append(btnDelete);
+
+//     tasksList.prepend(listItem);
+//     addListField.value = '';
+// });
 
 
 // Selected and Delete list
