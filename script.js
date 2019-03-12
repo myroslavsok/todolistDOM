@@ -1,73 +1,73 @@
-toDoList = [
-    {
-        list_name: 'First list',
-        list_tasks: [
-            {
-                checked: false,
-                list_tasks_name: 'First 1'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'First 2'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'First 3'
-            }
-        ]
-    },
-    {
-        list_name: 'second list',
-        list_tasks: [
-            {
-                checked: false,
-                list_tasks_name: 'second 1'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'second 2'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'second 3'
-            }
-        ]
-    },
-    {
-        list_name: 'Third list',
-        list_tasks: [
-            {
-                checked: false,
-                list_tasks_name: 'Third 1'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'Third 2'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'Third 3'
-            }
-        ]
-    },
-    {
-        list_name: 'Fours list',
-        list_tasks: [
-            {
-                checked: false,
-                list_tasks_name: 'Fours 1'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'Fours 2'
-            },
-            {
-                checked: false,
-                list_tasks_name: 'Fours 3'
-            }
-        ]
-    },
-]
+// toDoList = [
+//     {
+//         list_name: 'First list',
+//         list_tasks: [
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'First 1'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'First 2'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'First 3'
+//             }
+//         ]
+//     },
+//     {
+//         list_name: 'second list',
+//         list_tasks: [
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'second 1'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'second 2'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'second 3'
+//             }
+//         ]
+//     },
+//     {
+//         list_name: 'Third list',
+//         list_tasks: [
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Third 1'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Third 2'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Third 3'
+//             }
+//         ]
+//     },
+//     {
+//         list_name: 'Fours list',
+//         list_tasks: [
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Fours 1'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Fours 2'
+//             },
+//             {
+//                 checked: false,
+//                 list_tasks_name: 'Fours 3'
+//             }
+//         ]
+//     },
+// ]
 
 
 let toDoListTasks = document.getElementById('toDoListTasks');
@@ -81,12 +81,13 @@ function saveToLocalStorage() {
     });
 }
 
-function renderListItem(taskName) {
+function renderListItem(taskName, taskId) {
     //check
     if (!addTaskField.value && taskName == undefined) return alert('Field is empty');
 
     let itemTaskDiv = document.createElement('div');
     itemTaskDiv.classList.add('task__item');
+    itemTaskDiv.setAttribute('taskid', taskId);
 
     let itemTaskLabel = document.createElement('label');
     let itemTaskInput = document.createElement('input');
@@ -228,18 +229,27 @@ tasksList.addEventListener('mousedown', e => {
     target.closest('label').firstChild.setAttribute('checked', 'checked');
     // Display list's tasks
     toDoListTasks.innerHTML = '';
-
-    let listId = target.closest('label').getAttribute('listid');
-    console.log(listId);
-    // fetch(listsUrl + `/${listId}`)
-
-    let listName = target.closest('label').querySelector('p').textContent;
-    toDoList.forEach(list => {
-        if (list.list_name === listName)
-            list.list_tasks.forEach(task => {
-                renderListItem(task.list_tasks_name);
+    let selectedListId = target.closest('label').getAttribute('listid');
+    fetch(tasksUrl)
+        .then(resp => resp.json())
+        .then(tasks => {
+            console.log(tasks);
+            tasks.forEach(task => {
+                if (task.task_list_id == selectedListId)
+                    renderListItem(task.task_name, task.id);
             });
-    });
+        })
+        .catch(err => err);
+    
+    // console.log(selectedListId);
+
+    // let listName = target.closest('label').querySelector('p').textContent;
+    // toDoList.forEach(list => {
+    //     if (list.list_name === listName)
+    //         list.list_tasks.forEach(task => {
+    //             renderListItem(task.list_tasks_name);
+    //         });
+    // });
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     let deletedList = target.closest('.list_delete__btn').parentNode;
