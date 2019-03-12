@@ -1,7 +1,7 @@
 let toDoListTasks = document.getElementById('toDoListTasks');
 
 // Add new task
-function renderListItem(taskName, taskId) {
+function renderListItem(taskName, taskId, taskIsChecked) {
     //check
     if (!addTaskField.value && taskName == undefined) return alert('Field is empty');
 
@@ -13,6 +13,11 @@ function renderListItem(taskName, taskId) {
     let itemTaskInput = document.createElement('input');
     itemTaskInput.setAttribute('type', 'checkbox');
     let itemTaskText = document.createElement('p');
+
+    if (taskIsChecked) {
+        itemTaskDiv.classList.add('task__done');
+        itemTaskInput.setAttribute('checked', 'checked');
+    }
 
     itemTaskText.textContent = (taskName == undefined) ? addTaskField.value : taskName;
     itemTaskLabel.append(itemTaskInput);
@@ -77,7 +82,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
         })
             .then(res => res.json())
             .catch(e => console.log(e));
-        taskElem.remove();
+        return taskElem.remove();
     }
     // Editing name
     if (target.closest('button.edit_task__item')) {
@@ -92,7 +97,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
         
         // HTTP Edit reques
         let editTaskElemId = taskElem.getAttribute('taskid');
-        fetch(tasksUrl + `/${editTaskElemId}`, {
+        return fetch(tasksUrl + `/${editTaskElemId}`, {
             method: 'PATCH',
             headers: {
                 'Accept': 'application/json',
@@ -104,7 +109,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
         })
             .then(res => res.json())
             .then(res => res)
-            .catch(err => console.error(err))
+            .catch(err => console.error(err));
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -116,6 +121,22 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     } else {
         taskItemInput[0].setAttribute("checked", "checked");
     }
+    let taskItemId = taskItem.getAttribute('taskid');
+    let isTaskChecked = taskItemInput[0].getAttribute('checked') ? true : false;
+    console.log(isTaskChecked);
+    return fetch(tasksUrl + `/${taskItemId}`, {
+        method: 'PATCH',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            task_checked: isTaskChecked
+        })
+    })
+        .then(res => res.json())
+        .then(res => res)
+        .catch(err => console.error(err));
 });
 
 // Add new list
@@ -179,7 +200,7 @@ tasksList.addEventListener('mousedown', e => {
             console.log(tasks);
             tasks.forEach(task => {
                 if (task.task_list_id == selectedListId)
-                    renderListItem(task.task_name, task.id);
+                    renderListItem(task.task_name, task.id, task.task_checked);
             });
         })
         .catch(err => err);
