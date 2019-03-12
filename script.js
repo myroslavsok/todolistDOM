@@ -1,3 +1,21 @@
+const listsUrl = 'http://localhost:3000/lists';
+const tasksUrl = 'http://localhost:3000/tasks';
+
+// On load
+window.onload = function () {
+    // Getting lists
+    fetch(listsUrl)
+        .then(resp => resp.json())
+        .then(lists => {
+            lists.forEach(list => renderList(list.name, list.id))
+            console.log('lists get:', lists);
+        })
+        .catch((err) => {
+            console.error(err);
+            console.log('get lists');
+        });
+};
+
 let toDoListTasks = document.getElementById('toDoListTasks');
 
 // Add new task
@@ -58,9 +76,9 @@ formAddListItem.addEventListener('submit', e => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            task_list_id: listId,
-            task_name: taskName,
-            task_checked: false
+            listId: parseInt(listId),
+            name: taskName,
+            checked: false
         })
     })
         .then(resp => resp.json())
@@ -88,13 +106,13 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     if (target.closest('button.edit_task__item')) {
         let taskElem = target.closest('button.edit_task__item').parentNode.parentNode;
         let taskElemText = taskElem.firstChild.lastChild;
-        
+
         // Rendering new text (Editing)
         let defaultText = taskElemText.textContent;
         taskElemText.textContent = prompt('Rename task', taskElemText.textContent);
         if (!taskElemText.textContent)
             taskElemText.taskElemText = defaultText;
-        
+
         // HTTP Edit reques
         let editTaskElemId = taskElem.getAttribute('taskid');
         return fetch(tasksUrl + `/${editTaskElemId}`, {
@@ -104,7 +122,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                task_name: taskElemText.textContent
+                name: taskElemText.textContent
             })
         })
             .then(res => res.json())
@@ -123,7 +141,6 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     }
     let taskItemId = taskItem.getAttribute('taskid');
     let isTaskChecked = taskItemInput[0].getAttribute('checked') ? true : false;
-    console.log(isTaskChecked);
     return fetch(tasksUrl + `/${taskItemId}`, {
         method: 'PATCH',
         headers: {
@@ -131,7 +148,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            task_checked: isTaskChecked
+            checked: isTaskChecked
         })
     })
         .then(res => res.json())
@@ -171,7 +188,7 @@ formAddList.addEventListener('submit', e => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            list_name: addListField.value
+            name: addListField.value
         })
     })
         .then(resp => resp.json())
@@ -199,8 +216,8 @@ tasksList.addEventListener('mousedown', e => {
         .then(tasks => {
             console.log(tasks);
             tasks.forEach(task => {
-                if (task.task_list_id == selectedListId)
-                    renderListItem(task.task_name, task.id, task.task_checked);
+                if (task.listId == selectedListId)
+                    renderListItem(task.name, task.id, task.checked);
             });
         })
         .catch(err => err);
@@ -209,6 +226,7 @@ tasksList.addEventListener('mousedown', e => {
     let deletedList = target.closest('.list_delete__btn').parentNode;
     let deletedListId = deletedList.getAttribute('listid');
     console.log('delete', deletedListId);
+    // Deleting list
     fetch(listsUrl + `/${deletedListId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -218,34 +236,7 @@ tasksList.addEventListener('mousedown', e => {
         .then(res => console.log(res))
         .catch(e => console.log(e));
     deletedList.remove();
+
     // toDoListTasks.innerHTML = '';
     // addTaskField.setAttribute('disabled', 'disabled');
 });
-
-
-
-const listsUrl = 'http://localhost:3000/lists';
-const tasksUrl = 'http://localhost:3000/tasks';
-
-// On load
-window.onload = function () {
-    // Getting lists
-    fetch(listsUrl)
-        .then(resp => resp.json())
-        .then(lists => {
-            lists.forEach(list => renderList(list.list_name, list.id))
-            console.log('lists get:', lists);
-        })
-        .catch((err) => {
-            console.error(err);
-            console.log('get lists');
-        });
-};
-
-// Adding to localStorage
-// window.addEventListener('beforeunload', e => {
-//     e.preventDefault();
-//     e.returnValue = 'returnValue';
-//     localStorage.setItem('lists', tasksList.innerHTML);
-//     saveToLocalStorage();
-// });
