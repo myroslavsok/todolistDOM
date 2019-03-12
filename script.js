@@ -168,6 +168,8 @@ tasksList.addEventListener('mousedown', e => {
     let deletedListId = deletedList.getAttribute('listid');
     console.log('delete', deletedListId);
     // Deleting list
-    deleteList(deletedListId);
+    deleteList(deletedListId)
+        .then(() => toDoListTasks.innerHTML = '')
+        .catch(err => err);
     deletedList.remove();
 });
