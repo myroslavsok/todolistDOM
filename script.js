@@ -1,19 +1,71 @@
 toDoList = [
     {
         list_name: 'First list',
-        list_tasks: ['First 1', 'First 2', 'First 3']     
+        list_tasks: [
+            {
+                checked: false,
+                list_tasks_name: 'First 1'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'First 2'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'First 3'
+            }
+        ]      
     },
     {
         list_name: 'second list',
-        list_tasks: ['second 1', 'second 2', 'second 3']     
+        list_tasks: [
+            {
+                checked: false,
+                list_tasks_name: 'second 1'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'second 2'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'second 3'
+            }
+        ]         
     },
     {
         list_name: 'Third list',
-        list_tasks: ['Third 1', 'Third 2', 'Third 3']     
+        list_tasks: [
+            {
+                checked: false,
+                list_tasks_name: 'Third 1'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'Third 2'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'Third 3'
+            }
+        ]        
     },
     {
         list_name: 'Fours list',
-        list_tasks: ['Fours 1', 'Fours 2', 'Fours 3']     
+        list_tasks: [
+            {
+                checked: false,
+                list_tasks_name: 'Fours 1'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'Fours 2'
+            },
+            {
+                checked: false,
+                list_tasks_name: 'Fours 3'
+            }
+        ]         
     },
 ]
 
@@ -33,7 +85,6 @@ function renderListItem(taskName) {
     //check
     if (!addTaskField.value && taskName == undefined) return alert('Field is empty');
 
-
     let itemTaskDiv = document.createElement('div');
     itemTaskDiv.classList.add('task__item');
 
@@ -41,7 +92,7 @@ function renderListItem(taskName) {
     let itemTaskInput = document.createElement('input');
     itemTaskInput.setAttribute('type', 'checkbox');
     let itemTaskText = document.createElement('p');
-    
+
     itemTaskText.textContent = (taskName == undefined) ? addTaskField.value : taskName;
     itemTaskLabel.append(itemTaskInput);
     itemTaskLabel.append(itemTaskText);
@@ -67,6 +118,22 @@ function renderListItem(taskName) {
 let formAddListItem = document.getElementById('formAddListItem');
 formAddListItem.addEventListener('submit', e => {
     e.preventDefault();
+    let inputs = tasksList.getElementsByTagName('input');
+    let listName;
+    for (let input of inputs) {
+        if (input.checked)
+            listName = input.parentNode.children[1].textContent;
+            // alert(input.parentNode.children[1].textContent);
+    }
+    toDoList.forEach(list => {
+        if (list.list_name === listName)
+            list.list_tasks.push({
+                checked: false,
+                list_tasks_name: addTaskField.value
+            });
+    })
+    // Pushing to obj
+    console.log('toDoList', toDoList);
     renderListItem();
     saveToLocalStorage();
 });
@@ -106,22 +173,6 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     saveToLocalStorage();
 });
 
-// On load
-window.onload = function () {
-    toDoList.forEach(item => {
-        renderList(item.list_name);
-    });
-    // tasksList.innerHTML = localStorage.getItem('lists');
-};
-
-// Adding to localStorage
-// window.addEventListener('beforeunload', e => {
-//     e.preventDefault();
-//     e.returnValue = 'returnValue';
-//     localStorage.setItem('lists', tasksList.innerHTML);
-//     saveToLocalStorage();
-// });
-
 // Add new list
 // let addListBtn = document.getElementById('addListBtn');
 let addListField = document.getElementById('addListField');
@@ -148,7 +199,11 @@ function renderList(listName) {
 let formAddList = document.getElementById('formAddList');
 formAddList.addEventListener('submit', e => {
     e.preventDefault();
-    renderList();
+    toDoList.push({
+        list_name: addListField.value,
+        list_tasks: []
+    });
+    renderList(toDoList[toDoList.length - 1].list_name);
 });
 
 
@@ -158,18 +213,20 @@ tasksList.addEventListener('mousedown', e => {
     // Select
     if (!target.closest('label')) return;
     addTaskField.removeAttribute('disabled');
+    // Checking selected element
+    let inputs = tasksList.querySelectorAll('input');
+    for (let input of inputs)
+        input.removeAttribute('checked')
+    target.closest('label').firstChild.setAttribute('checked', 'checked');
+    // Display list's tasks
     toDoListTasks.innerHTML = '';
     let listName = target.closest('label').querySelector('p').textContent;
-    // alert(listName);
     toDoList.forEach(list => {
         if (list.list_name === listName) 
             list.list_tasks.forEach(task => {
-                renderListItem(task);
+                renderListItem(task.list_tasks_name);
             });
     });
-    // for (let key in localStorage)
-    //     if (key === listName)
-    //         toDoListTasks.innerHTML = localStorage.getItem(listName);
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     target.closest('.list_delete__btn').parentNode.remove();
@@ -177,3 +234,52 @@ tasksList.addEventListener('mousedown', e => {
     toDoListTasks.innerHTML = '';
     addTaskField.setAttribute('disabled', 'disabled');
 });
+
+
+
+//test
+// const serverURL = 'http://localhost:3000/';
+// function create(data) {
+//     let options = {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(data)
+//     }
+//     return fetch(serverURL + '/posts', options)
+//       .then((response) => response.json)
+//   }
+//   create({title: "check it out", author: "Mike"})
+
+const listsUrl = 'http://localhost:3000/lists';
+const tasksUrl = 'http://localhost:3000/tasks';
+
+
+
+// On load
+window.onload = function () {
+    // Getting lists
+    fetch(listsUrl)
+        .then((resp) => resp.json())
+        .then(lists => {
+            lists.forEach(list => renderList(list.list_name))
+            console.log('lists get:', lists);
+        })
+        .catch((err) => {
+            console.error(err);
+            console.log('get lists');
+        });
+    // toDoList.forEach(item => {
+    //     renderList(item.list_name);
+    // });
+    // tasksList.innerHTML = localStorage.getItem('lists');
+};
+
+// Adding to localStorage
+// window.addEventListener('beforeunload', e => {
+//     e.preventDefault();
+//     e.returnValue = 'returnValue';
+//     localStorage.setItem('lists', tasksList.innerHTML);
+//     saveToLocalStorage();
+// });
