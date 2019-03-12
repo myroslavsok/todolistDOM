@@ -1,19 +1,13 @@
-const listsUrl = 'http://localhost:3000/lists';
-const tasksUrl = 'http://localhost:3000/tasks';
+// const listsUrl = 'http://localhost:3000/lists';
+// const tasksUrl = 'http://localhost:3000/tasks';
 
 // On load
 window.onload = function () {
-    // Getting lists
-    fetch(listsUrl)
-        .then(resp => resp.json())
-        .then(lists => {
+    uploadLists().
+        then(lists => {
             lists.forEach(list => renderList(list.name, list.id))
-            console.log('lists get:', lists);
         })
-        .catch((err) => {
-            console.error(err);
-            console.log('get lists');
-        });
+        .catch(err => err);
 };
 
 let toDoListTasks = document.getElementById('toDoListTasks');
@@ -69,21 +63,9 @@ formAddListItem.addEventListener('submit', e => {
         if (input.checked)
             listId = input.parentNode.getAttribute('listid');
     let taskName = addTaskField.value;
-    fetch(tasksUrl, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            listId: parseInt(listId),
-            name: taskName,
-            checked: false
-        })
-    })
-        .then(resp => resp.json())
+    addNewTask(listId, taskName)
         .then(newTask => renderListItem(newTask.name, newTask.id))
-        .catch(e => e);
+        .catch(err => err);
 });
 
 // Checking-unchecking, deleting, edit task (useing delegation)
@@ -93,13 +75,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     if (target.closest('button.remove_task__item')) {
         let taskElem = target.closest('button.remove_task__item').parentNode.parentNode;
         let deleteTaskElemId = taskElem.getAttribute('taskid');
-        fetch(tasksUrl + `/${deleteTaskElemId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: deleteTaskElemId })
-        })
-            .then(res => res.json())
-            .catch(e => console.log(e));
+        deleteTask(deleteTaskElemId);
         return taskElem.remove();
     }
     // Editing name
@@ -115,19 +91,7 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 
         // HTTP Edit reques
         let editTaskElemId = taskElem.getAttribute('taskid');
-        return fetch(tasksUrl + `/${editTaskElemId}`, {
-            method: 'PATCH',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: taskElemText.textContent
-            })
-        })
-            .then(res => res.json())
-            .then(res => res)
-            .catch(err => console.error(err));
+        return editTask(editTaskElemId, taskElemText);
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -141,19 +105,8 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     }
     let taskItemId = taskItem.getAttribute('taskid');
     let isTaskChecked = taskItemInput[0].getAttribute('checked') ? true : false;
-    return fetch(tasksUrl + `/${taskItemId}`, {
-        method: 'PATCH',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            checked: isTaskChecked
-        })
-    })
-        .then(res => res.json())
-        .then(res => res)
-        .catch(err => console.error(err));
+    
+    return checkTask(taskItemId, isTaskChecked);
 });
 
 // Add new list
@@ -181,17 +134,7 @@ function renderList(listName, listId) {
 let formAddList = document.getElementById('formAddList');
 formAddList.addEventListener('submit', e => {
     e.preventDefault();
-    fetch(listsUrl, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: addListField.value
-        })
-    })
-        .then(resp => resp.json())
+    addNewList(addListField)
         .then(newList => renderList(newList.name, newList.id))
         .catch(e => e);
 });
@@ -211,10 +154,8 @@ tasksList.addEventListener('mousedown', e => {
     // Display list's tasks
     toDoListTasks.innerHTML = '';
     let selectedListId = target.closest('label').getAttribute('listid');
-    fetch(tasksUrl)
-        .then(resp => resp.json())
+    selectList()
         .then(tasks => {
-            console.log(tasks);
             tasks.forEach(task => {
                 if (task.listId == selectedListId)
                     renderListItem(task.name, task.id, task.checked);
@@ -227,16 +168,6 @@ tasksList.addEventListener('mousedown', e => {
     let deletedListId = deletedList.getAttribute('listid');
     console.log('delete', deletedListId);
     // Deleting list
-    fetch(listsUrl + `/${deletedListId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: deletedListId })
-    })
-        .then(res => res.json())
-        .then(res => console.log(res))
-        .catch(e => console.log(e));
+    deleteList(deletedListId);
     deletedList.remove();
-
-    // toDoListTasks.innerHTML = '';
-    // addTaskField.setAttribute('disabled', 'disabled');
 });

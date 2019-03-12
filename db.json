@@ -1,0 +1,38 @@
+{
+  "lists": [
+    {
+      "name": "Second list",
+      "id": 2
+    },
+    {
+      "name": "Third list",
+      "id": 3
+    }
+  ],
+  "tasks": [
+    {
+      "listId": 3,
+      "name": "bread",
+      "checked": true,
+      "id": 10
+    },
+    {
+      "listId": 3,
+      "name": "water",
+      "checked": false,
+      "id": 11
+    },
+    {
+      "listId": 2,
+      "name": "fly 12312",
+      "checked": true,
+      "id": 12
+    },
+    {
+      "listId": 2,
+      "name": "sit",
+      "checked": false,
+      "id": 13
+    }
+  ]
+}
