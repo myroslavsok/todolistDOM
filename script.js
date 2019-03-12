@@ -1,86 +1,6 @@
-// toDoList = [
-//     {
-//         list_name: 'First list',
-//         list_tasks: [
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'First 1'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'First 2'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'First 3'
-//             }
-//         ]
-//     },
-//     {
-//         list_name: 'second list',
-//         list_tasks: [
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'second 1'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'second 2'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'second 3'
-//             }
-//         ]
-//     },
-//     {
-//         list_name: 'Third list',
-//         list_tasks: [
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Third 1'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Third 2'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Third 3'
-//             }
-//         ]
-//     },
-//     {
-//         list_name: 'Fours list',
-//         list_tasks: [
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Fours 1'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Fours 2'
-//             },
-//             {
-//                 checked: false,
-//                 list_tasks_name: 'Fours 3'
-//             }
-//         ]
-//     },
-// ]
-
-
 let toDoListTasks = document.getElementById('toDoListTasks');
 
-function saveToLocalStorage() {
-    tasksList.querySelectorAll('input').forEach(item => {
-        if (item.checked) {
-            let listName = item.parentNode.querySelector('p').textContent;
-            localStorage.setItem(listName, toDoListTasks.innerHTML);
-        }
-    });
-}
-
+// Add new task
 function renderListItem(taskName, taskId) {
     //check
     if (!addTaskField.value && taskName == undefined) return alert('Field is empty');
@@ -116,50 +36,75 @@ function renderListItem(taskName, taskId) {
     addTaskField.value = '';
 }
 
+let addTaskField = document.getElementById('addTaskField');
 let formAddListItem = document.getElementById('formAddListItem');
 formAddListItem.addEventListener('submit', e => {
     e.preventDefault();
     let inputs = tasksList.getElementsByTagName('input');
-    let listName;
-    for (let input of inputs) {
+    let listId;
+    for (let input of inputs)
         if (input.checked)
-            listName = input.parentNode.children[1].textContent;
-        // alert(input.parentNode.children[1].textContent);
-    }
-    toDoList.forEach(list => {
-        if (list.list_name === listName)
-            list.list_tasks.push({
-                checked: false,
-                list_tasks_name: addTaskField.value
-            });
+            listId = input.parentNode.getAttribute('listid');
+    let taskName = addTaskField.value;
+    fetch(tasksUrl, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            task_list_id: listId,
+            task_name: taskName,
+            task_checked: false
+        })
     })
-    // Pushing to obj
-    console.log('toDoList', toDoList);
-    renderListItem();
-    saveToLocalStorage();
+        .then(resp => resp.json())
+        .then(newTask => renderListItem(newTask.name, newTask.id))
+        .catch(e => e);
 });
-
-// Adding task
-// let addTaskBtn = document.getElementById('addTaskBtn');
-let addTaskField = document.getElementById('addTaskField');
 
 // Checking-unchecking, deleting, edit task (useing delegation)
 toDoListTasks.addEventListener('mousedown', (event) => {
     let target = event.target;
     // Deleting
     if (target.closest('button.remove_task__item')) {
-        target.closest('button.remove_task__item').parentNode.parentNode.remove();
-        return saveToLocalStorage();
+        let taskElem = target.closest('button.remove_task__item').parentNode.parentNode;
+        let deleteTaskElemId = taskElem.getAttribute('taskid');
+        fetch(tasksUrl + `/${deleteTaskElemId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: deleteTaskElemId })
+        })
+            .then(res => res.json())
+            .catch(e => console.log(e));
+        taskElem.remove();
     }
     // Editing name
     if (target.closest('button.edit_task__item')) {
-        let taskItemContainer = target.closest('button.edit_task__item').parentNode.parentNode;
-        let taskItemName = taskItemContainer.getElementsByTagName('p');
-        let defaultText = taskItemName[0].textContent;
-        taskItemName[0].textContent = prompt('Rename task', taskItemName[0].textContent);
-        if (!taskItemName[0].textContent)
-            taskItemName[0].textContent = defaultText;
-        return saveToLocalStorage();
+        let taskElem = target.closest('button.edit_task__item').parentNode.parentNode;
+        let taskElemText = taskElem.firstChild.lastChild;
+        
+        // Rendering new text (Editing)
+        let defaultText = taskElemText.textContent;
+        taskElemText.textContent = prompt('Rename task', taskElemText.textContent);
+        if (!taskElemText.textContent)
+            taskElemText.taskElemText = defaultText;
+        
+        // HTTP Edit reques
+        let editTaskElemId = taskElem.getAttribute('taskid');
+        fetch(tasksUrl + `/${editTaskElemId}`, {
+            method: 'PATCH',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                task_name: taskElemText.textContent
+            })
+        })
+            .then(res => res.json())
+            .then(res => res)
+            .catch(err => console.error(err))
     }
     // Checking-unchecking
     let taskItem = target.closest('div.task__item');
@@ -171,7 +116,6 @@ toDoListTasks.addEventListener('mousedown', (event) => {
     } else {
         taskItemInput[0].setAttribute("checked", "checked");
     }
-    saveToLocalStorage();
 });
 
 // Add new list
@@ -209,10 +153,9 @@ formAddList.addEventListener('submit', e => {
             list_name: addListField.value
         })
     })
-        .then(resp => console.log('add new listresp', resp))
+        .then(resp => resp.json())
+        .then(newList => renderList(newList.name, newList.id))
         .catch(e => e);
-
-    renderList(toDoList[toDoList.length - 1].list_name);
 });
 
 
@@ -240,16 +183,6 @@ tasksList.addEventListener('mousedown', e => {
             });
         })
         .catch(err => err);
-    
-    // console.log(selectedListId);
-
-    // let listName = target.closest('label').querySelector('p').textContent;
-    // toDoList.forEach(list => {
-    //     if (list.list_name === listName)
-    //         list.list_tasks.forEach(task => {
-    //             renderListItem(task.list_tasks_name);
-    //         });
-    // });
     // Delete
     if (!target.closest('.list_delete__btn')) return;
     let deletedList = target.closest('.list_delete__btn').parentNode;
@@ -258,7 +191,7 @@ tasksList.addEventListener('mousedown', e => {
     fetch(listsUrl + `/${deletedListId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: deletedListId})
+        body: JSON.stringify({ id: deletedListId })
     })
         .then(res => res.json())
         .then(res => console.log(res))
