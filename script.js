@@ -14,7 +14,7 @@ toDoList = [
                 checked: false,
                 list_tasks_name: 'First 3'
             }
-        ]      
+        ]
     },
     {
         list_name: 'second list',
@@ -31,7 +31,7 @@ toDoList = [
                 checked: false,
                 list_tasks_name: 'second 3'
             }
-        ]         
+        ]
     },
     {
         list_name: 'Third list',
@@ -48,7 +48,7 @@ toDoList = [
                 checked: false,
                 list_tasks_name: 'Third 3'
             }
-        ]        
+        ]
     },
     {
         list_name: 'Fours list',
@@ -65,7 +65,7 @@ toDoList = [
                 checked: false,
                 list_tasks_name: 'Fours 3'
             }
-        ]         
+        ]
     },
 ]
 
@@ -123,7 +123,7 @@ formAddListItem.addEventListener('submit', e => {
     for (let input of inputs) {
         if (input.checked)
             listName = input.parentNode.children[1].textContent;
-            // alert(input.parentNode.children[1].textContent);
+        // alert(input.parentNode.children[1].textContent);
     }
     toDoList.forEach(list => {
         if (list.list_name === listName)
@@ -174,12 +174,12 @@ toDoListTasks.addEventListener('mousedown', (event) => {
 });
 
 // Add new list
-// let addListBtn = document.getElementById('addListBtn');
 let addListField = document.getElementById('addListField');
 let tasksList = document.getElementById('tasksList');
 
-function renderList(listName) {
+function renderList(listName, listId) {
     let listItem = document.createElement('label');
+    listItem.setAttribute('listid', listId);
     let listItemInput = document.createElement('input');
     listItemInput.type = 'radio';
     listItemInput.name = 'todolist';
@@ -191,7 +191,6 @@ function renderList(listName) {
     listItem.append(listItemInput);
     listItem.append(listItemText);
     listItem.append(btnDelete);
-
     tasksList.prepend(listItem);
     addListField.value = '';
 }
@@ -199,10 +198,19 @@ function renderList(listName) {
 let formAddList = document.getElementById('formAddList');
 formAddList.addEventListener('submit', e => {
     e.preventDefault();
-    toDoList.push({
-        list_name: addListField.value,
-        list_tasks: []
-    });
+    fetch(listsUrl, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            list_name: addListField.value
+        })
+    })
+        .then(resp => console.log('add new listresp', resp))
+        .catch(e => e);
+
     renderList(toDoList[toDoList.length - 1].list_name);
 });
 
@@ -220,60 +228,54 @@ tasksList.addEventListener('mousedown', e => {
     target.closest('label').firstChild.setAttribute('checked', 'checked');
     // Display list's tasks
     toDoListTasks.innerHTML = '';
+
+    let listId = target.closest('label').getAttribute('listid');
+    console.log(listId);
+    // fetch(listsUrl + `/${listId}`)
+
     let listName = target.closest('label').querySelector('p').textContent;
     toDoList.forEach(list => {
-        if (list.list_name === listName) 
+        if (list.list_name === listName)
             list.list_tasks.forEach(task => {
                 renderListItem(task.list_tasks_name);
             });
     });
     // Delete
     if (!target.closest('.list_delete__btn')) return;
-    target.closest('.list_delete__btn').parentNode.remove();
-    localStorage.removeItem(listName);
-    toDoListTasks.innerHTML = '';
-    addTaskField.setAttribute('disabled', 'disabled');
+    let deletedList = target.closest('.list_delete__btn').parentNode;
+    let deletedListId = deletedList.getAttribute('listid');
+    console.log('delete', deletedListId);
+    fetch(listsUrl + `/${deletedListId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: deletedListId})
+    })
+        .then(res => res.json())
+        .then(res => console.log(res))
+        .catch(e => console.log(e));
+    deletedList.remove();
+    // toDoListTasks.innerHTML = '';
+    // addTaskField.setAttribute('disabled', 'disabled');
 });
 
 
 
-//test
-// const serverURL = 'http://localhost:3000/';
-// function create(data) {
-//     let options = {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(data)
-//     }
-//     return fetch(serverURL + '/posts', options)
-//       .then((response) => response.json)
-//   }
-//   create({title: "check it out", author: "Mike"})
-
 const listsUrl = 'http://localhost:3000/lists';
 const tasksUrl = 'http://localhost:3000/tasks';
-
-
 
 // On load
 window.onload = function () {
     // Getting lists
     fetch(listsUrl)
-        .then((resp) => resp.json())
+        .then(resp => resp.json())
         .then(lists => {
-            lists.forEach(list => renderList(list.list_name))
+            lists.forEach(list => renderList(list.list_name, list.id))
             console.log('lists get:', lists);
         })
         .catch((err) => {
             console.error(err);
             console.log('get lists');
         });
-    // toDoList.forEach(item => {
-    //     renderList(item.list_name);
-    // });
-    // tasksList.innerHTML = localStorage.getItem('lists');
 };
 
 // Adding to localStorage
