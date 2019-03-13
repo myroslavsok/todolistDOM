@@ -1,6 +1,3 @@
-// const listsUrl = 'http://localhost:3000/lists';
-// const tasksUrl = 'http://localhost:3000/tasks';
-
 // On load
 window.onload = function () {
     uploadLists().
